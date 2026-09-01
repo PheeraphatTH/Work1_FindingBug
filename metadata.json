@@ -1,0 +1,7 @@
+{
+  "name": "Demon Slayer Corps Registration Form",
+  "description": "A modern, aesthetic bilingual QA testing application form in Demon Slayer (Kimetsu no Yaiba) theme with interactive validation and language switching.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+
