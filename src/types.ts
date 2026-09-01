@@ -1,15 +1,20 @@
 export type Language = 'th' | 'en';
 
-export type ArchaeologyExp = 'none' | 'intermediate' | 'veteran' | 'master';
+export type ArchaeologyExp = 'none' | 'amateur' | 'intermediate' | 'professional';
+export type ContactMethod = 'email' | 'phone' | 'whatsapp';
 
 export interface FormData {
   fullName: string;
   email: string;
   contactNumber: string;
   dob: string;
-  archaeologyExp: ArchaeologyExp;
+  archaeologyExp: ArchaeologyExp | '';
+  preferredRole: string;
   expeditionRegion: string;
+  desiredSalary: string;
+  contactMethod: ContactMethod;
   passportFile: File | null;
+  comments: string;
   agreeTerms: boolean;
 }
 
@@ -19,8 +24,12 @@ export interface FormErrors {
   contactNumber?: string;
   dob?: string;
   archaeologyExp?: string;
+  preferredRole?: string;
   expeditionRegion?: string;
+  desiredSalary?: string;
+  contactMethod?: string;
   passportFile?: string;
+  comments?: string;
   agreeTerms?: string;
 }
 
@@ -33,6 +42,7 @@ export interface Translations {
   badgeInstitution: string;
   sectionGeneral: string;
   sectionExpedition: string;
+  sectionPreferences: string;
   sectionVerification: string;
   
   // Fields
@@ -51,14 +61,29 @@ export interface Translations {
   archaeologyExpLabel: string;
   archaeologyExpOptions: {
     none: { label: string; desc: string };
+    amateur: { label: string; desc: string };
     intermediate: { label: string; desc: string };
-    veteran: { label: string; desc: string };
-    master: { label: string; desc: string };
+    professional: { label: string; desc: string };
   };
+
+  preferredRoleLabel: string;
+  preferredRolePlaceholder: string;
+  preferredRoles: { value: string; label: string }[];
   
   expeditionRegionLabel: string;
   expeditionRegionPlaceholder: string;
   expeditionRegions: { value: string; label: string; desc: string }[];
+
+  desiredSalaryLabel: string;
+  desiredSalaryPlaceholder: string;
+  desiredSalaryHint: string;
+
+  contactMethodLabel: string;
+  contactMethods: {
+    email: string;
+    phone: string;
+    whatsapp: string;
+  };
   
   passportLabel: string;
   passportDropText: string;
@@ -66,6 +91,9 @@ export interface Translations {
   passportSupportedText: string;
   passportSelectedText: string;
   removeFileText: string;
+
+  commentsLabel: string;
+  commentsPlaceholder: string;
   
   agreeTermsLabel: string;
   termsLinkText: string;
@@ -74,15 +102,18 @@ export interface Translations {
   submitButton: string;
   clearButton: string;
   submittingText: string;
+  viewSpecsButton: string;
   
   // Errors
   errorRequired: string;
   errorEmailInvalid: string;
-  errorPhoneInvalid: string; // The UI error text that asks for 10 digits
+  errorPhoneInvalid: string;
   errorDobRequired: string;
   errorDobFuture: string;
   errorExpRequired: string;
+  errorRoleRequired: string;
   errorRegionRequired: string;
+  errorSalaryInvalid: string;
   errorPassportRequired: string;
   errorPassportInvalidType: string;
   errorTermsRequired: string;
@@ -99,5 +130,11 @@ export interface Translations {
   termsModalTitle: string;
   termsModalContent: string[];
   termsModalClose: string;
+
+  // QA Specs
+  specsTitle: string;
+  specsSubtitle: string;
+  specsClose: string;
+  specsItems: { title: string; desc: string }[];
 }
 

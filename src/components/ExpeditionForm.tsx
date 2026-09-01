@@ -17,14 +17,20 @@ import {
   RotateCcw,
   Sparkles,
   MapPin,
+  Briefcase,
+  DollarSign,
+  MessageSquare,
+  Compass,
+  FileSpreadsheet,
 } from 'lucide-react';
-import { FormData, FormErrors, Translations, ArchaeologyExp } from '../types';
+import { FormData, FormErrors, Translations, ArchaeologyExp, ContactMethod } from '../types';
 
 interface ExpeditionFormProps {
   formData: FormData;
   setFormData: React.Dispatch<React.SetStateAction<FormData>>;
   onSuccess: (data: FormData) => void;
   onOpenTerms: () => void;
+  onOpenSpecs?: () => void;
   t: Translations;
 }
 
@@ -33,6 +39,7 @@ export const ExpeditionForm: React.FC<ExpeditionFormProps> = ({
   setFormData,
   onSuccess,
   onOpenTerms,
+  onOpenSpecs,
   t,
 }) => {
   const [errors, setErrors] = useState<FormErrors>({});
@@ -42,7 +49,7 @@ export const ExpeditionForm: React.FC<ExpeditionFormProps> = ({
 
   // Field change handlers
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     const { name, value, type } = e.target;
     if (type === 'checkbox') {
@@ -62,6 +69,13 @@ export const ExpeditionForm: React.FC<ExpeditionFormProps> = ({
     setFormData((prev) => ({ ...prev, archaeologyExp: exp }));
     if (errors.archaeologyExp) {
       setErrors((prev) => ({ ...prev, archaeologyExp: undefined }));
+    }
+  };
+
+  const handleContactMethodChange = (method: ContactMethod) => {
+    setFormData((prev) => ({ ...prev, contactMethod: method }));
+    if (errors.contactMethod) {
+      setErrors((prev) => ({ ...prev, contactMethod: undefined }));
     }
   };
 
@@ -106,9 +120,13 @@ export const ExpeditionForm: React.FC<ExpeditionFormProps> = ({
       email: '',
       contactNumber: '',
       dob: '',
-      archaeologyExp: 'none',
+      archaeologyExp: '',
+      preferredRole: '',
       expeditionRegion: '',
+      desiredSalary: '',
+      contactMethod: 'email',
       passportFile: null,
+      comments: '',
       agreeTerms: false,
     });
     setErrors({});
@@ -121,7 +139,7 @@ export const ExpeditionForm: React.FC<ExpeditionFormProps> = ({
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
 
-    // 1. Full Name (Standard required)
+    // 1. Full Name (Required)
     if (!formData.fullName.trim()) {
       newErrors.fullName = t.errorRequired;
     }
@@ -157,23 +175,33 @@ export const ExpeditionForm: React.FC<ExpeditionFormProps> = ({
       }
     }
 
-    // 5. Breathing Style Experience / Rank (Required)
+    // 5. Archaeology Experience (Required)
     if (!formData.archaeologyExp) {
       newErrors.archaeologyExp = t.errorExpRequired;
     }
 
-    // 6. Preferred Mission Region (Required)
+    // 6. Preferred Role (Required)
+    if (!formData.preferredRole) {
+      newErrors.preferredRole = t.errorRoleRequired;
+    }
+
+    // 7. Preferred Expedition Region (Required)
     if (!formData.expeditionRegion) {
       newErrors.expeditionRegion = t.errorRegionRequired;
     }
 
-    // 7. Slayer Certificate / ID Document (Required)
+    // 8. Desired Salary (Required and must be a valid number > 0)
+    if (!formData.desiredSalary || isNaN(Number(formData.desiredSalary)) || Number(formData.desiredSalary) <= 0) {
+      newErrors.desiredSalary = t.errorSalaryInvalid;
+    }
+
+    // 9. Passport / ID Document (Required)
     if (!formData.passportFile) {
       newErrors.passportFile = t.errorPassportRequired;
     }
 
     // ==========================================
-    // 8. INTENTIONAL BUG 2: Terms & Conditions Checkbox
+    // 10. INTENTIONAL BUG 2: Terms & Conditions Checkbox
     // Inverted logic: throws error if CHECKED, passes if UNCHECKED!
     // ==========================================
     if (formData.agreeTerms) { // <-- BUG 2: Throws error when user checks the box!
@@ -206,7 +234,7 @@ export const ExpeditionForm: React.FC<ExpeditionFormProps> = ({
 
   return (
     <form
-      id="demon-slayer-corps-form"
+      id="realbugz-expedition-form"
       onSubmit={handleSubmit}
       noValidate
       className="relative space-y-8 rounded-3xl border border-emerald-500/30 bg-[#0c121e]/90 p-5 sm:p-8 md:p-10 shadow-2xl backdrop-blur-2xl transition-all duration-300 ring-1 ring-emerald-500/20"
@@ -214,7 +242,7 @@ export const ExpeditionForm: React.FC<ExpeditionFormProps> = ({
       {/* Decorative top border bar with Tanjiro pattern */}
       <div className="absolute -top-[1px] left-6 right-6 h-1.5 rounded-t-full bg-ichimatsu" />
 
-      {/* SECTION 1: Slayer Personal Information */}
+      {/* SECTION 1: Personal Information */}
       <div className="space-y-6">
         <div className="flex items-center justify-between border-b border-emerald-500/20 pb-3">
           <div className="flex items-center gap-2.5">
@@ -226,7 +254,7 @@ export const ExpeditionForm: React.FC<ExpeditionFormProps> = ({
             </h3>
           </div>
           <span className="hidden sm:inline-flex items-center gap-1 font-kanji text-xs font-bold text-emerald-400/80 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
-            鬼殺隊士
+            隊士基本情報
           </span>
         </div>
 
@@ -267,7 +295,7 @@ export const ExpeditionForm: React.FC<ExpeditionFormProps> = ({
             )}
           </div>
 
-          {/* Email Address / Kasugai Crow */}
+          {/* Email Address */}
           <div id="field-email" className="space-y-1.5">
             <label
               htmlFor="email"
@@ -381,7 +409,7 @@ export const ExpeditionForm: React.FC<ExpeditionFormProps> = ({
         </div>
       </div>
 
-      {/* SECTION 2: Breathing Style Mastery & Rank */}
+      {/* SECTION 2: Experience & Preferred Role */}
       <div className="space-y-6">
         <div className="flex items-center justify-between border-b border-emerald-500/20 pb-3">
           <div className="flex items-center gap-2.5">
@@ -393,11 +421,11 @@ export const ExpeditionForm: React.FC<ExpeditionFormProps> = ({
             </h3>
           </div>
           <span className="hidden sm:inline-flex items-center gap-1 font-kanji text-xs font-bold text-rose-400/80 bg-rose-500/10 px-2.5 py-0.5 rounded-full border border-rose-500/20">
-            全集中・呼吸
+            探検隊・役割
           </span>
         </div>
 
-        {/* Breathing Style Experience Radio Cards */}
+        {/* Archaeology Experience Radio Cards */}
         <div id="field-archaeologyExp" className="space-y-2.5">
           <label className="flex items-center justify-between text-xs sm:text-sm font-semibold text-slate-200">
             <span className="flex items-center gap-1.5">
@@ -452,60 +480,237 @@ export const ExpeditionForm: React.FC<ExpeditionFormProps> = ({
           )}
         </div>
 
-        {/* Preferred Mission Region Dropdown */}
-        <div id="field-expeditionRegion" className="space-y-1.5">
-          <label
-            htmlFor="expeditionRegion"
-            className="flex items-center justify-between text-xs sm:text-sm font-semibold text-slate-200"
-          >
-            <span className="flex items-center gap-1.5">
-              {t.expeditionRegionLabel} <span className="text-emerald-400">*</span>
-            </span>
-          </label>
-          <div className="relative">
-            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-emerald-500/70">
-              <MapPin className="h-4 w-4" />
-            </div>
-            <select
-              id="expeditionRegion"
-              name="expeditionRegion"
-              value={formData.expeditionRegion}
-              onChange={handleInputChange}
-              className={`w-full appearance-none rounded-xl border bg-[#080d17]/80 py-3 pl-10 pr-10 text-sm text-white transition-all duration-200 focus:outline-none focus:ring-2 cursor-pointer ${
-                errors.expeditionRegion
-                  ? 'border-rose-500/80 focus:border-rose-500 focus:ring-rose-500/20 bg-rose-950/15'
-                  : 'border-slate-700/80 focus:border-emerald-400 focus:ring-emerald-400/20 hover:border-emerald-500/50'
-              }`}
+        {/* 2-Column Grid: Preferred Role & Preferred Region */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          {/* Preferred Role Dropdown */}
+          <div id="field-preferredRole" className="space-y-1.5">
+            <label
+              htmlFor="preferredRole"
+              className="flex items-center justify-between text-xs sm:text-sm font-semibold text-slate-200"
             >
-              <option value="" disabled className="bg-slate-900 text-slate-400">
-                {t.expeditionRegionPlaceholder}
-              </option>
-              {t.expeditionRegions.map((region) => (
-                <option
-                  key={region.value}
-                  value={region.value}
-                  className="bg-slate-900 text-slate-100 py-2"
-                >
-                  {region.label}
+              <span className="flex items-center gap-1.5">
+                {t.preferredRoleLabel} <span className="text-emerald-400">*</span>
+              </span>
+            </label>
+            <div className="relative">
+              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-emerald-500/70">
+                <Briefcase className="h-4 w-4" />
+              </div>
+              <select
+                id="preferredRole"
+                name="preferredRole"
+                value={formData.preferredRole}
+                onChange={handleInputChange}
+                className={`w-full appearance-none rounded-xl border bg-[#080d17]/80 py-3 pl-10 pr-10 text-sm text-white transition-all duration-200 focus:outline-none focus:ring-2 cursor-pointer ${
+                  errors.preferredRole
+                    ? 'border-rose-500/80 focus:border-rose-500 focus:ring-rose-500/20 bg-rose-950/15'
+                    : 'border-slate-700/80 focus:border-emerald-400 focus:ring-emerald-400/20 hover:border-emerald-500/50'
+                }`}
+              >
+                <option value="" disabled className="bg-slate-900 text-slate-400">
+                  {t.preferredRolePlaceholder}
                 </option>
-              ))}
-            </select>
-            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400">
-              <svg className="h-4 w-4 fill-current" viewBox="0 0 20 20">
-                <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
-              </svg>
+                {t.preferredRoles.map((role) => (
+                  <option
+                    key={role.value}
+                    value={role.value}
+                    className="bg-slate-900 text-slate-100 py-2"
+                  >
+                    {role.label}
+                  </option>
+                ))}
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400">
+                <svg className="h-4 w-4 fill-current" viewBox="0 0 20 20">
+                  <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+                </svg>
+              </div>
             </div>
+            {errors.preferredRole && (
+              <p className="flex items-center gap-1 text-xs font-medium text-rose-400 animate-in fade-in">
+                <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                <span>{errors.preferredRole}</span>
+              </p>
+            )}
           </div>
-          {errors.expeditionRegion && (
-            <p className="flex items-center gap-1 text-xs font-medium text-rose-400 animate-in fade-in">
-              <AlertCircle className="h-3.5 w-3.5 shrink-0" />
-              <span>{errors.expeditionRegion}</span>
-            </p>
-          )}
+
+          {/* Preferred Expedition Region Dropdown */}
+          <div id="field-expeditionRegion" className="space-y-1.5">
+            <label
+              htmlFor="expeditionRegion"
+              className="flex items-center justify-between text-xs sm:text-sm font-semibold text-slate-200"
+            >
+              <span className="flex items-center gap-1.5">
+                {t.expeditionRegionLabel} <span className="text-emerald-400">*</span>
+              </span>
+            </label>
+            <div className="relative">
+              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-emerald-500/70">
+                <MapPin className="h-4 w-4" />
+              </div>
+              <select
+                id="expeditionRegion"
+                name="expeditionRegion"
+                value={formData.expeditionRegion}
+                onChange={handleInputChange}
+                className={`w-full appearance-none rounded-xl border bg-[#080d17]/80 py-3 pl-10 pr-10 text-sm text-white transition-all duration-200 focus:outline-none focus:ring-2 cursor-pointer ${
+                  errors.expeditionRegion
+                    ? 'border-rose-500/80 focus:border-rose-500 focus:ring-rose-500/20 bg-rose-950/15'
+                    : 'border-slate-700/80 focus:border-emerald-400 focus:ring-emerald-400/20 hover:border-emerald-500/50'
+                }`}
+              >
+                <option value="" disabled className="bg-slate-900 text-slate-400">
+                  {t.expeditionRegionPlaceholder}
+                </option>
+                {t.expeditionRegions.map((region) => (
+                  <option
+                    key={region.value}
+                    value={region.value}
+                    className="bg-slate-900 text-slate-100 py-2"
+                  >
+                    {region.label}
+                  </option>
+                ))}
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400">
+                <svg className="h-4 w-4 fill-current" viewBox="0 0 20 20">
+                  <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+                </svg>
+              </div>
+            </div>
+            {errors.expeditionRegion && (
+              <p className="flex items-center gap-1 text-xs font-medium text-rose-400 animate-in fade-in">
+                <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                <span>{errors.expeditionRegion}</span>
+              </p>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* SECTION 3: Identity Verification & Slayer Oath */}
+      {/* SECTION 3: Compensation & Contact Preferences */}
+      <div className="space-y-6">
+        <div className="flex items-center justify-between border-b border-emerald-500/20 pb-3">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/15 text-amber-400 ring-1 ring-amber-500/40">
+              <DollarSign className="h-4 w-4" />
+            </div>
+            <h3 className="text-base sm:text-lg font-bold text-white tracking-wide">
+              {t.sectionPreferences}
+            </h3>
+          </div>
+          <span className="hidden sm:inline-flex items-center gap-1 font-kanji text-xs font-bold text-amber-400/80 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20">
+            報酬・連絡
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          {/* Desired Salary per Week */}
+          <div id="field-desiredSalary" className="space-y-1.5">
+            <label
+              htmlFor="desiredSalary"
+              className="flex items-center justify-between text-xs sm:text-sm font-semibold text-slate-200"
+            >
+              <span className="flex items-center gap-1.5">
+                {t.desiredSalaryLabel} <span className="text-emerald-400">*</span>
+              </span>
+            </label>
+            <div className="relative">
+              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-amber-400/90 font-bold text-sm">
+                $
+              </div>
+              <input
+                type="number"
+                id="desiredSalary"
+                name="desiredSalary"
+                value={formData.desiredSalary}
+                onChange={handleInputChange}
+                placeholder={t.desiredSalaryPlaceholder}
+                min="1"
+                step="50"
+                className={`w-full rounded-xl border bg-[#080d17]/80 py-3 pl-9 pr-14 text-sm text-white placeholder-slate-500 font-mono transition-all duration-200 focus:outline-none focus:ring-2 ${
+                  errors.desiredSalary
+                    ? 'border-rose-500/80 focus:border-rose-500 focus:ring-rose-500/20 bg-rose-950/15'
+                    : 'border-slate-700/80 focus:border-emerald-400 focus:ring-emerald-400/20 hover:border-emerald-500/50'
+                }`}
+              />
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5 text-xs font-bold text-slate-400">
+                USD/wk
+              </div>
+            </div>
+            <p className="text-[11px] text-slate-400">
+              {t.desiredSalaryHint}
+            </p>
+            {errors.desiredSalary && (
+              <p className="flex items-center gap-1 text-xs font-medium text-rose-400 animate-in fade-in">
+                <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                <span>{errors.desiredSalary}</span>
+              </p>
+            )}
+          </div>
+
+          {/* Preferred Contact Method */}
+          <div id="field-contactMethod" className="space-y-1.5">
+            <label className="flex items-center justify-between text-xs sm:text-sm font-semibold text-slate-200">
+              <span className="flex items-center gap-1.5">
+                {t.contactMethodLabel} <span className="text-emerald-400">*</span>
+              </span>
+            </label>
+            <div className="flex flex-wrap items-center gap-2 pt-1">
+              {(['email', 'phone', 'whatsapp'] as ContactMethod[]).map((method) => {
+                const isSelected = formData.contactMethod === method;
+                return (
+                  <button
+                    key={method}
+                    type="button"
+                    onClick={() => handleContactMethodChange(method)}
+                    className={`flex items-center gap-2 rounded-xl border px-3.5 py-2.5 text-xs font-bold transition-all cursor-pointer ${
+                      isSelected
+                        ? 'border-emerald-400 bg-emerald-950/50 text-emerald-300 ring-1 ring-emerald-400/30'
+                        : 'border-slate-800 bg-[#080d17]/60 text-slate-300 hover:border-emerald-500/30 hover:bg-[#0c1424]'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="contactMethod"
+                      value={method}
+                      checked={isSelected}
+                      onChange={() => handleContactMethodChange(method)}
+                      className="accent-emerald-500 text-emerald-500 cursor-pointer"
+                    />
+                    <span>{t.contactMethods[method]}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Additional Comments Textarea */}
+          <div id="field-comments" className="space-y-1.5 sm:col-span-2">
+            <label
+              htmlFor="comments"
+              className="flex items-center justify-between text-xs sm:text-sm font-semibold text-slate-200"
+            >
+              <span className="flex items-center gap-1.5">
+                {t.commentsLabel}
+              </span>
+            </label>
+            <div className="relative">
+              <textarea
+                id="comments"
+                name="comments"
+                rows={3}
+                value={formData.comments}
+                onChange={handleInputChange}
+                placeholder={t.commentsPlaceholder}
+                className="w-full rounded-xl border border-slate-700/80 bg-[#080d17]/80 p-3.5 text-sm text-white placeholder-slate-500 transition-all duration-200 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20 hover:border-emerald-500/50"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* SECTION 4: Identity Verification & Terms Agreement */}
       <div className="space-y-6">
         <div className="flex items-center justify-between border-b border-emerald-500/20 pb-3">
           <div className="flex items-center gap-2.5">
@@ -517,11 +722,11 @@ export const ExpeditionForm: React.FC<ExpeditionFormProps> = ({
             </h3>
           </div>
           <span className="hidden sm:inline-flex items-center gap-1 font-kanji text-xs font-bold text-purple-400/80 bg-purple-500/10 px-2.5 py-0.5 rounded-full border border-purple-500/20">
-            藤の花・契り
+            誓約・証明書
           </span>
         </div>
 
-        {/* Slayer ID / Training Certificate Upload */}
+        {/* Passport / ID Document Upload */}
         <div id="field-passportFile" className="space-y-2">
           <label className="flex items-center justify-between text-xs sm:text-sm font-semibold text-slate-200">
             <span className="flex items-center gap-1.5">
@@ -609,7 +814,7 @@ export const ExpeditionForm: React.FC<ExpeditionFormProps> = ({
           )}
         </div>
 
-        {/* Demon Slayer Sacred Oath Checkbox (Subject to BUG 2) */}
+        {/* Agreement to Terms Checkbox (Subject to BUG 2) */}
         <div id="field-agreeTerms" className="space-y-1.5 pt-2">
           <div
             id="terms-checkbox-container"
@@ -658,38 +863,53 @@ export const ExpeditionForm: React.FC<ExpeditionFormProps> = ({
         </div>
       </div>
 
-      {/* Action Buttons: Submit and Clear */}
-      <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-3.5 pt-4 border-t border-emerald-500/20">
-        <button
-          type="button"
-          id="clear-form-btn"
-          onClick={handleClear}
-          className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-xl border border-slate-700 bg-slate-800/80 px-6 py-3.5 text-xs sm:text-sm font-bold text-slate-300 hover:bg-slate-700 hover:text-white transition-all cursor-pointer"
-        >
-          <RotateCcw className="h-4 w-4" />
-          <span>{t.clearButton}</span>
-        </button>
+      {/* Action Buttons: Submit, Clear, and View Specs */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3.5 pt-4 border-t border-emerald-500/20">
+        {onOpenSpecs ? (
+          <button
+            type="button"
+            id="view-qa-specs-btn"
+            onClick={onOpenSpecs}
+            className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-xl border border-emerald-500/40 bg-emerald-950/40 px-4 py-3 text-xs font-bold text-emerald-300 hover:bg-emerald-900/50 hover:text-white transition-all cursor-pointer"
+          >
+            <FileSpreadsheet className="h-4 w-4" />
+            <span>{t.viewSpecsButton}</span>
+          </button>
+        ) : <div />}
 
-        <button
-          type="submit"
-          id="submit-form-btn"
-          disabled={isSubmitting}
-          className="relative group overflow-hidden w-full sm:w-auto flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-500 to-emerald-500 px-8 py-3.5 text-xs sm:text-sm font-black text-slate-950 shadow-xl shadow-emerald-500/25 hover:from-emerald-500 hover:to-teal-400 hover:shadow-emerald-500/40 active:scale-[0.98] transition-all disabled:opacity-50 cursor-pointer"
-        >
-          {isSubmitting ? (
-            <>
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-950 border-t-transparent" />
-              <span>{t.submittingText}</span>
-            </>
-          ) : (
-            <>
-              <Sword className="h-4 w-4 stroke-[2.6] transition-transform group-hover:rotate-45" />
-              <span>{t.submitButton}</span>
-            </>
-          )}
-        </button>
+        <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+          <button
+            type="button"
+            id="clear-form-btn"
+            onClick={handleClear}
+            className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-xl border border-slate-700 bg-slate-800/80 px-5 py-3.5 text-xs sm:text-sm font-bold text-slate-300 hover:bg-slate-700 hover:text-white transition-all cursor-pointer"
+          >
+            <RotateCcw className="h-4 w-4" />
+            <span>{t.clearButton}</span>
+          </button>
+
+          <button
+            type="submit"
+            id="submit-form-btn"
+            disabled={isSubmitting}
+            className="relative group overflow-hidden w-full sm:w-auto flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-500 to-emerald-500 px-7 py-3.5 text-xs sm:text-sm font-black text-slate-950 shadow-xl shadow-emerald-500/25 hover:from-emerald-500 hover:to-teal-400 hover:shadow-emerald-500/40 active:scale-[0.98] transition-all disabled:opacity-50 cursor-pointer"
+          >
+            {isSubmitting ? (
+              <>
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-950 border-t-transparent" />
+                <span>{t.submittingText}</span>
+              </>
+            ) : (
+              <>
+                <Sword className="h-4 w-4 stroke-[2.6] transition-transform group-hover:rotate-45" />
+                <span>{t.submitButton}</span>
+              </>
+            )}
+          </button>
+        </div>
       </div>
     </form>
   );
 };
+
 

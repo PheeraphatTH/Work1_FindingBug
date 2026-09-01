@@ -1,5 +1,18 @@
 import React from 'react';
-import { Award, FileCheck, X, Printer, Sparkles, Sword, ShieldCheck, MapPin } from 'lucide-react';
+import {
+  Award,
+  FileCheck,
+  X,
+  Printer,
+  Sparkles,
+  Sword,
+  ShieldCheck,
+  MapPin,
+  Briefcase,
+  DollarSign,
+  PhoneCall,
+  MessageSquare,
+} from 'lucide-react';
 import { FormData, Translations } from '../types';
 
 interface SuccessModalProps {
@@ -24,6 +37,7 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
   };
 
   const selectedRegion = t.expeditionRegions.find(r => r.value === formData.expeditionRegion);
+  const selectedRole = t.preferredRoles.find(r => r.value === formData.preferredRole);
   const selectedExp = t.archaeologyExpOptions[formData.archaeologyExp];
 
   return (
@@ -49,7 +63,7 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
           type="button"
           id="close-success-btn"
           onClick={onClose}
-          className="absolute top-4 right-4 rounded-full p-2 text-slate-400 hover:bg-slate-800 hover:text-white transition-colors"
+          className="absolute top-4 right-4 rounded-full p-2 text-slate-400 hover:bg-slate-800 hover:text-white transition-colors cursor-pointer"
         >
           <X className="h-5 w-5" />
         </button>
@@ -84,37 +98,67 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
         </div>
 
         {/* Summary Card */}
-        <div className="space-y-2.5 rounded-2xl bg-[#080d17]/80 p-4 border border-slate-700/60 text-xs sm:text-sm max-h-[35vh] overflow-y-auto pr-1">
-          <div className="flex justify-between border-b border-slate-800 pb-2">
+        <div className="space-y-2 rounded-2xl bg-[#080d17]/80 p-4 border border-slate-700/60 text-xs sm:text-sm max-h-[36vh] overflow-y-auto pr-1">
+          <div className="flex justify-between border-b border-slate-800 pb-1.5">
             <span className="text-slate-400">{t.fullNameLabel}:</span>
             <span className="font-bold text-white text-right">{formData.fullName}</span>
           </div>
-          <div className="flex justify-between border-b border-slate-800 pb-2">
+          <div className="flex justify-between border-b border-slate-800 pb-1.5">
             <span className="text-slate-400">{t.emailLabel}:</span>
             <span className="font-semibold text-emerald-300 text-right">{formData.email}</span>
           </div>
-          <div className="flex justify-between border-b border-slate-800 pb-2">
+          <div className="flex justify-between border-b border-slate-800 pb-1.5">
             <span className="text-slate-400">{t.contactNumberLabel}:</span>
             <span className="font-mono font-semibold text-amber-300 text-right">{formData.contactNumber}</span>
           </div>
-          <div className="flex justify-between border-b border-slate-800 pb-2">
+          <div className="flex justify-between border-b border-slate-800 pb-1.5">
             <span className="text-slate-400">{t.dobLabel}:</span>
             <span className="font-semibold text-white text-right">{formData.dob}</span>
           </div>
-          <div className="flex justify-between border-b border-slate-800 pb-2">
+          <div className="flex justify-between border-b border-slate-800 pb-1.5">
             <span className="text-slate-400 flex items-center gap-1">
               <Sword className="h-3.5 w-3.5 text-emerald-400" />
               {t.archaeologyExpLabel}:
             </span>
             <span className="font-bold text-emerald-300 text-right">{selectedExp?.label || formData.archaeologyExp}</span>
           </div>
-          <div className="flex justify-between border-b border-slate-800 pb-2">
+          <div className="flex justify-between border-b border-slate-800 pb-1.5">
+            <span className="text-slate-400 flex items-center gap-1">
+              <Briefcase className="h-3.5 w-3.5 text-cyan-400" />
+              {t.preferredRoleLabel}:
+            </span>
+            <span className="font-semibold text-cyan-300 text-right">{selectedRole?.label || formData.preferredRole}</span>
+          </div>
+          <div className="flex justify-between border-b border-slate-800 pb-1.5">
             <span className="text-slate-400 flex items-center gap-1">
               <MapPin className="h-3.5 w-3.5 text-rose-400" />
               {t.expeditionRegionLabel}:
             </span>
             <span className="font-semibold text-rose-300 text-right">{selectedRegion?.label || formData.expeditionRegion}</span>
           </div>
+          <div className="flex justify-between border-b border-slate-800 pb-1.5">
+            <span className="text-slate-400 flex items-center gap-1">
+              <DollarSign className="h-3.5 w-3.5 text-amber-400" />
+              {t.desiredSalaryLabel}:
+            </span>
+            <span className="font-mono font-bold text-amber-300 text-right">${formData.desiredSalary} USD/wk</span>
+          </div>
+          <div className="flex justify-between border-b border-slate-800 pb-1.5">
+            <span className="text-slate-400 flex items-center gap-1">
+              <PhoneCall className="h-3.5 w-3.5 text-teal-400" />
+              {t.contactMethodLabel}:
+            </span>
+            <span className="font-semibold text-teal-300 text-right">{t.contactMethods[formData.contactMethod]}</span>
+          </div>
+          {formData.comments && (
+            <div className="flex flex-col border-b border-slate-800 pb-1.5">
+              <span className="text-slate-400 flex items-center gap-1">
+                <MessageSquare className="h-3.5 w-3.5 text-indigo-400" />
+                {t.commentsLabel}:
+              </span>
+              <span className="text-slate-200 mt-1 italic pl-2 border-l-2 border-slate-700">{formData.comments}</span>
+            </div>
+          )}
           <div className="flex justify-between items-center pt-1">
             <span className="text-slate-400 flex items-center gap-1">
               <FileCheck className="h-3.5 w-3.5 text-purple-400" />
@@ -150,4 +194,5 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
     </div>
   );
 };
+
 
